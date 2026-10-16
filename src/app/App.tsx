@@ -8,7 +8,7 @@ import { RewardModal } from './components/RewardModal';
 import { OnboardingTutorial } from './components/OnboardingTutorial';
 import {
   Compass, Heart, MessageCircle, User, Trophy, Sun, Moon, Crown, X, Check,
-  Flame, Zap, Bell, Settings
+  Flame, Zap, Bell, Settings, ChevronRight
 } from 'lucide-react';
 import { motion } from 'motion/react';
 export type { FPTOffice, FPTCity } from './data/locations';
@@ -348,9 +348,24 @@ function DesktopDiscover({
   onFiltersChange: (f: FilterState) => void; isPremium: boolean; onShowPremium: () => void;
   matches: Match[]; userStats: UserStats;
 }) {
+  const [rightTab, setRightTab] = useState<'filters' | 'dashboard' | 'highlights' | 'settings'>('highlights');
+  const [ageRange, setAgeRange] = useState<[number, number]>(activeFilters.ageRange);
+  const [aiSort, setAiSort] = useState(activeFilters.aiSortFirst);
+  const [notifMatches, setNotifMatches] = useState(true);
+  const [notifMessages, setNotifMessages] = useState(true);
+  const [notifLikes, setNotifLikes] = useState(false);
+  const [showVerifiedOnly, setShowVerifiedOnly] = useState(false);
+
+  const rightTabs: { id: typeof rightTab; label: string; icon: React.ReactNode }[] = [
+    { id: 'highlights', label: 'Highlights', icon: <Zap className="size-3.5" /> },
+    { id: 'filters',   label: 'Filters',    icon: <Settings className="size-3.5" /> },
+    { id: 'dashboard', label: 'Dashboard',  icon: <Trophy className="size-3.5" /> },
+    { id: 'settings',  label: 'Settings',   icon: <Bell className="size-3.5" /> },
+  ];
+
   return (
-    <div className="h-full flex gap-0">
-      {/* Card stack - centered column */}
+    <div className="h-full flex">
+      {/* Card stack — centered */}
       <div className="flex-1 flex items-start justify-center overflow-hidden">
         <div className="w-full max-w-sm h-full">
           <SwipeView
@@ -361,76 +376,331 @@ function DesktopDiscover({
         </div>
       </div>
 
-      {/* Right activity panel */}
-      <div className="w-72 flex-shrink-0 border-l border-border overflow-y-auto bg-card">
-        {/* Today's stats */}
-        <div className="p-5 border-b border-border">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Today</p>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { label: 'Swipes', value: userStats.swipesToday, color: 'text-[#F36F21]' },
-              { label: 'Matches', value: userStats.matchesToday, color: 'text-pink-500' },
-              { label: 'Points', value: `+${userStats.swipesToday * 5 + userStats.matchesToday * 50}`, color: 'text-[#C9972B]' },
-            ].map(s => (
-              <div key={s.label} className="text-center p-2 bg-muted rounded-xl">
-                <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
-                <p className="text-[10px] text-muted-foreground">{s.label}</p>
-              </div>
-            ))}
-          </div>
+      {/* Right panel */}
+      <div className="w-72 flex-shrink-0 border-l border-border flex flex-col bg-card">
+        {/* Tab bar */}
+        <div className="grid grid-cols-4 border-b border-border flex-shrink-0">
+          {rightTabs.map(t => (
+            <button
+              key={t.id}
+              onClick={() => setRightTab(t.id)}
+              className={`flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-semibold transition-all border-b-2 ${
+                rightTab === t.id
+                  ? 'border-[#F36F21] text-[#F36F21]'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {t.icon}
+              {t.label}
+            </button>
+          ))}
         </div>
 
-        {/* AI Insights */}
-        <div className="p-5 border-b border-border">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-            <Zap className="size-3 inline mr-1 text-[#F36F21]" />AI Insights
-          </p>
-          <div className="space-y-3">
-            {[
-              { icon: '🎯', text: 'Your profile gets 2× more right swipes on Tuesday evenings.' },
-              { icon: '✨', text: 'Adding a second photo could increase your matches by 40%.' },
-              { icon: '💬', text: '3 matches are waiting for your first message.' },
-            ].map((tip, i) => (
-              <div key={i} className="flex gap-2.5">
-                <span className="text-base flex-shrink-0">{tip.icon}</span>
-                <p className="text-xs text-muted-foreground leading-relaxed">{tip.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Tab content */}
+        <div className="flex-1 overflow-y-auto">
 
-        {/* Recent matches */}
-        {matches.length > 0 && (
-          <div className="p-5">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Recent Matches</p>
-            <div className="space-y-3">
-              {matches.slice(0, 4).map(m => (
-                <div key={m.id} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-muted ring-2 ring-[#F36F21]/40">
-                    <img src={m.profile.photos[0]} alt={m.profile.name} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{m.profile.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{m.profile.city} · {m.profile.compatibilityScore}% match</p>
-                  </div>
-                  <button className="text-[10px] text-[#F36F21] font-semibold bg-[#FFF5EE] dark:bg-[#2A1F0F] px-2 py-1 rounded-lg flex-shrink-0">
-                    Chat
-                  </button>
+          {/* ── HIGHLIGHTS ── */}
+          {rightTab === 'highlights' && (
+            <div className="p-4 space-y-4">
+              {/* AI insights */}
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
+                  AI Insights
+                </p>
+                <div className="space-y-2.5">
+                  {[
+                    { icon: '🎯', text: 'Profile gets 2× more right swipes on Tuesday evenings.' },
+                    { icon: '✨', text: 'A second photo could lift your matches by 40%.' },
+                    { icon: '💬', text: `${matches.length > 0 ? matches.length : 3} matches waiting for your first message.` },
+                    { icon: '🔥', text: `You're in the top 12% this week in Ho Chi Minh City.` },
+                  ].map((tip, i) => (
+                    <div key={i} className="flex gap-2.5 bg-muted/50 rounded-xl p-2.5">
+                      <span className="text-sm flex-shrink-0">{tip.icon}</span>
+                      <p className="text-xs text-foreground leading-relaxed">{tip.text}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+              </div>
 
-        {matches.length === 0 && (
-          <div className="p-5 text-center">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Recent Matches</p>
-            <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-2">
-              <Heart className="size-5 text-muted-foreground/50" />
+              {/* Recent matches */}
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">Recent Matches</p>
+                {matches.length > 0 ? (
+                  <div className="space-y-2">
+                    {matches.slice(0, 5).map(m => (
+                      <div key={m.id} className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-muted/50 transition-colors">
+                        <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 bg-muted ring-2 ring-[#F36F21]/30">
+                          <img src={m.profile.photos[0]} alt={m.profile.name} className="w-full h-full object-cover object-top" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-foreground truncate">{m.profile.name}</p>
+                          <p className="text-[10px] text-muted-foreground">{m.profile.compatibilityScore}% compatible</p>
+                        </div>
+                        <button className="text-[10px] text-[#F36F21] font-semibold bg-[#FFF5EE] dark:bg-[#2A1F0F] px-2 py-1 rounded-lg flex-shrink-0">
+                          Chat
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6">
+                    <Heart className="size-8 text-muted-foreground/30 mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground">Swipe right to match!</p>
+                  </div>
+                )}
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">Swipe right to get your first match!</p>
-          </div>
-        )}
+          )}
+
+          {/* ── FILTERS ── */}
+          {rightTab === 'filters' && (
+            <div className="p-4 space-y-5">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Age Range</p>
+                  <span className="text-xs font-semibold text-[#F36F21]">{ageRange[0]}–{ageRange[1]}</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-muted-foreground w-6">Min</span>
+                    <input
+                      type="range" min={18} max={ageRange[1] - 1} value={ageRange[0]}
+                      onChange={e => { const v = +e.target.value; setAgeRange([v, ageRange[1]]); onFiltersChange({ ...activeFilters, ageRange: [v, ageRange[1]] }); }}
+                      className="flex-1 accent-[#F36F21]"
+                    />
+                    <span className="text-[10px] text-foreground w-6 text-right">{ageRange[0]}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-muted-foreground w-6">Max</span>
+                    <input
+                      type="range" min={ageRange[0] + 1} max={60} value={ageRange[1]}
+                      onChange={e => { const v = +e.target.value; setAgeRange([ageRange[0], v]); onFiltersChange({ ...activeFilters, ageRange: [ageRange[0], v] }); }}
+                      className="flex-1 accent-[#F36F21]"
+                    />
+                    <span className="text-[10px] text-foreground w-6 text-right">{ageRange[1]}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-px bg-border" />
+
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">Office Location</p>
+                <div className="space-y-1.5">
+                  {['Ftown 3 & Ftown 2', 'Tan Thuan Office', 'Cau Giay Office', 'Hoa Lac Campus'].map(office => {
+                    const active = Object.values(activeFilters.selectedOfficeIds).flat().some(id =>
+                      (office === 'Ftown 3 & Ftown 2' && id === 'ftown') ||
+                      (office === 'Tan Thuan Office' && id === 'tanthan') ||
+                      (office === 'Cau Giay Office' && id === 'caugiay') ||
+                      (office === 'Hoa Lac Campus' && id === 'hoalac')
+                    );
+                    return (
+                      <button
+                        key={office}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-xs font-medium transition-all ${active ? 'border-[#F36F21] bg-[#FFF5EE] dark:bg-[#2A1F0F] text-[#F36F21]' : 'border-border text-muted-foreground hover:border-[#F36F21]/50'}`}
+                      >
+                        <div className={`w-3.5 h-3.5 rounded-sm border-2 flex items-center justify-center flex-shrink-0 ${active ? 'border-[#F36F21] bg-[#F36F21]' : 'border-border'}`}>
+                          {active && <Check className="size-2.5 text-white" />}
+                        </div>
+                        {office}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="h-px bg-border" />
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-foreground">AI Smart Sort</p>
+                  <p className="text-[10px] text-muted-foreground">Best matches appear first</p>
+                </div>
+                <button
+                  onClick={() => { setAiSort(!aiSort); onFiltersChange({ ...activeFilters, aiSortFirst: !aiSort }); }}
+                  className={`w-10 h-5.5 rounded-full transition-all relative flex-shrink-0 ${aiSort ? 'bg-[#F36F21]' : 'bg-muted'}`}
+                  style={{ height: '22px', width: '40px' }}
+                >
+                  <span className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-all ${aiSort ? 'left-5' : 'left-0.5'}`} style={{ width: '18px', height: '18px', top: '2px', left: aiSort ? '20px' : '2px' }} />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-foreground">Verified Only</p>
+                  <p className="text-[10px] text-muted-foreground">FPT email verified profiles</p>
+                </div>
+                <button
+                  onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
+                  className={`w-10 rounded-full transition-all relative flex-shrink-0 ${showVerifiedOnly ? 'bg-[#F36F21]' : 'bg-muted'}`}
+                  style={{ height: '22px', width: '40px' }}
+                >
+                  <span className={`absolute top-0.5 bg-white rounded-full shadow transition-all`} style={{ width: '18px', height: '18px', top: '2px', left: showVerifiedOnly ? '20px' : '2px' }} />
+                </button>
+              </div>
+
+              <button
+                onClick={() => { setAgeRange([21, 40]); setAiSort(true); setShowVerifiedOnly(false); onFiltersChange({ selectedCityIds: [], selectedOfficeIds: {}, ageRange: [21, 40], maxDistance: 50, aiSortFirst: true }); }}
+                className="w-full py-2.5 rounded-xl border border-border text-xs font-semibold text-muted-foreground hover:bg-muted transition-colors"
+              >
+                Reset all filters
+              </button>
+            </div>
+          )}
+
+          {/* ── DASHBOARD ── */}
+          {rightTab === 'dashboard' && (
+            <div className="p-4 space-y-4">
+              {/* Today stats */}
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">Today</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: 'Swipes', value: userStats.swipesToday, icon: '👆', color: 'text-[#F36F21]', bg: 'bg-[#FFF5EE] dark:bg-[#2A1F0F]' },
+                    { label: 'Matches', value: userStats.matchesToday, icon: '💛', color: 'text-pink-500', bg: 'bg-pink-50 dark:bg-pink-950/30' },
+                    { label: 'Points', value: `+${userStats.swipesToday * 5 + userStats.matchesToday * 50}`, icon: '⭐', color: 'text-[#C9972B]', bg: 'bg-[#FFF8E1] dark:bg-yellow-950/30' },
+                    { label: 'Streak', value: `${userStats.streak}d 🔥`, icon: '', color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-950/30' },
+                  ].map(s => (
+                    <div key={s.label} className={`${s.bg} rounded-2xl p-3`}>
+                      <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
+                      <p className="text-[10px] text-muted-foreground font-medium">{s.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-px bg-border" />
+
+              {/* Weekly bar chart */}
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">This Week</p>
+                <div className="flex items-end gap-1.5 h-20">
+                  {[
+                    { day: 'M', swipes: 12, matches: 2 },
+                    { day: 'T', swipes: 18, matches: 4 },
+                    { day: 'W', swipes: 8, matches: 1 },
+                    { day: 'T', swipes: 22, matches: 5 },
+                    { day: 'F', swipes: 15, matches: 3 },
+                    { day: 'S', swipes: userStats.swipesToday, matches: userStats.matchesToday },
+                    { day: 'S', swipes: 0, matches: 0 },
+                  ].map((d, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
+                      <div className="w-full flex flex-col gap-0.5 items-center justify-end" style={{ height: '64px' }}>
+                        {d.matches > 0 && (
+                          <div className="w-full rounded-t bg-pink-400" style={{ height: `${(d.matches / 6) * 32}px`, minHeight: '4px' }} />
+                        )}
+                        {d.swipes > 0 && (
+                          <div className="w-full rounded-b bg-[#F36F21]/60" style={{ height: `${(d.swipes / 24) * 48}px`, minHeight: '4px' }} />
+                        )}
+                        {d.swipes === 0 && <div className="w-full h-0.5 bg-border rounded" />}
+                      </div>
+                      <p className="text-[9px] text-muted-foreground">{d.day}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center gap-3 mt-2">
+                  <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-[#F36F21]/60" /><span className="text-[10px] text-muted-foreground">Swipes</span></div>
+                  <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-pink-400" /><span className="text-[10px] text-muted-foreground">Matches</span></div>
+                </div>
+              </div>
+
+              <div className="h-px bg-border" />
+
+              {/* Level progress */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Level Progress</p>
+                  <span className="text-xs font-bold text-[#C9972B]">Lv.{userStats.level}</span>
+                </div>
+                <div className="bg-muted rounded-full h-2 mb-1">
+                  <div className="bg-gradient-to-r from-[#C9972B] to-[#F36F21] h-2 rounded-full transition-all" style={{ width: '68%' }} />
+                </div>
+                <div className="flex justify-between">
+                  <p className="text-[10px] text-muted-foreground">{userStats.points.toLocaleString()} pts</p>
+                  <p className="text-[10px] text-muted-foreground">3,600 next level</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── SETTINGS ── */}
+          {rightTab === 'settings' && (
+            <div className="p-4 space-y-4">
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">Notifications</p>
+                <div className="bg-muted/40 rounded-2xl overflow-hidden divide-y divide-border">
+                  {[
+                    { label: 'New matches', sub: 'Be the first to say hi', val: notifMatches, set: setNotifMatches },
+                    { label: 'New messages', sub: 'Stay in the conversation', val: notifMessages, set: setNotifMessages },
+                    { label: 'Likes received', sub: 'Premium — see who liked you', val: notifLikes, set: setNotifLikes },
+                  ].map(row => (
+                    <div key={row.label} className="flex items-center justify-between px-3.5 py-3">
+                      <div>
+                        <p className="text-xs font-semibold text-foreground">{row.label}</p>
+                        <p className="text-[10px] text-muted-foreground">{row.sub}</p>
+                      </div>
+                      <button
+                        onClick={() => row.set(!row.val)}
+                        className={`rounded-full flex-shrink-0 transition-all relative ${row.val ? 'bg-[#F36F21]' : 'bg-border'}`}
+                        style={{ width: '36px', height: '20px' }}
+                      >
+                        <span className="absolute bg-white rounded-full shadow transition-all" style={{ width: '16px', height: '16px', top: '2px', left: row.val ? '18px' : '2px' }} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-px bg-border" />
+
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">Visibility</p>
+                <div className="bg-muted/40 rounded-2xl overflow-hidden divide-y divide-border">
+                  <div className="flex items-center justify-between px-3.5 py-3">
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">Show in Discover</p>
+                      <p className="text-[10px] text-muted-foreground">Others can find your profile</p>
+                    </div>
+                    <div className="w-9 h-5 rounded-full bg-[#F36F21] relative">
+                      <span className="absolute bg-white rounded-full shadow" style={{ width: '16px', height: '16px', top: '2px', left: '18px' }} />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between px-3.5 py-3">
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">Hide from office</p>
+                      <p className="text-[10px] text-muted-foreground">Ftown 3 & Ftown 2</p>
+                    </div>
+                    <div className="w-9 h-5 rounded-full bg-border relative">
+                      <span className="absolute bg-white rounded-full shadow" style={{ width: '16px', height: '16px', top: '2px', left: '2px' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-px bg-border" />
+
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">Quick Actions</p>
+                <div className="space-y-1.5">
+                  {[
+                    { icon: '✏️', label: 'Edit Profile', sub: 'Update photos & bio' },
+                    { icon: '📍', label: 'Location Settings', sub: 'Ftown 3 & Ftown 2 · D9' },
+                    { icon: '🛡', label: 'Safe Distance', sub: isPremium ? 'Active · 200m radius' : 'Premium feature' },
+                  ].map(a => (
+                    <button key={a.label} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-left">
+                      <span className="text-base flex-shrink-0">{a.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-foreground">{a.label}</p>
+                        <p className="text-[10px] text-muted-foreground">{a.sub}</p>
+                      </div>
+                      <ChevronRight className="size-3.5 text-muted-foreground flex-shrink-0" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -23,7 +23,7 @@ const mockProfiles: Profile[] = [
     bio: 'Frontend dev who believes great UX makes lives better ✨ Coffee snob, weekend hiker, aspiring home chef.',
     photos: [avatarLinh],
     interests: ['Hiking', 'Coffee', 'Design', 'Cooking'],
-    city: 'Ho Chi Minh City', cityId: 'hcm', office: 'Quang Trung Software City', officeId: 'quantrung',
+    city: 'Ho Chi Minh City', cityId: 'hcm', office: 'Ftown 3 & Ftown 2', officeId: 'ftown',
     locationVisibility: 'city+office', verified: true, trustScore: 'High', compatibilityScore: 87,
     highlights: ['Adventurous spirit', 'Loves hiking', 'Creative soul'],
     role: 'Frontend Engineer · Senior', distance: 2, location: { lat: 10.85, lng: 106.63 },
@@ -93,7 +93,7 @@ const mockProfiles: Profile[] = [
     bio: 'Engineering manager learning to code again for fun 😄 Father of two, occasional marathoner, always up for team trivia. Firm believer in psychological safety at work.',
     photos: [avatarKhoa],
     interests: ['Running', 'Tech', 'Games', 'Coffee'],
-    city: 'Ho Chi Minh City', cityId: 'hcm', office: 'Quang Trung Software City', officeId: 'quantrung',
+    city: 'Ho Chi Minh City', cityId: 'hcm', office: 'Ftown 3 & Ftown 2', officeId: 'ftown',
     locationVisibility: 'city', verified: true, trustScore: 'High', compatibilityScore: 65,
     highlights: ['Team player', 'Runner', 'Trivia king'],
     role: 'Engineering Manager', distance: 4, location: { lat: 10.86, lng: 106.64 },
@@ -487,34 +487,7 @@ export function SwipeView({ onMatch, onSwipe, activeFilters, onFiltersChange, is
 
       {/* Action buttons row — shown when there's an active card */}
       {remaining > 0 && !showAd && (!isPremium ? likesUsed < FREE_LIKE_LIMIT : true) && (
-        <div className="flex items-center justify-center gap-5 px-4 pb-3 flex-shrink-0">
-          {/* Pass */}
-          <button
-            onClick={() => handleSwipe('left')}
-            className="w-14 h-14 rounded-full bg-card border-2 border-border shadow-md flex items-center justify-center text-muted-foreground hover:border-red-400 hover:text-red-400 transition-all active:scale-95"
-            aria-label="Pass"
-          >
-            <X className="size-6" />
-          </button>
-
-          {/* Block */}
-          <button
-            onClick={() => setShowBlockSheet(true)}
-            className="w-14 h-14 rounded-full bg-card border-2 border-border shadow-md flex items-center justify-center text-muted-foreground hover:border-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all active:scale-95"
-            aria-label="Block"
-          >
-            <Ban className="size-6" />
-          </button>
-
-          {/* Like */}
-          <button
-            onClick={() => handleSwipe('right')}
-            className="w-14 h-14 rounded-full bg-[#F36F21] shadow-md flex items-center justify-center text-white hover:bg-[#e05e10] transition-all active:scale-95"
-            aria-label="Like"
-          >
-            <Heart className="size-6" fill="white" />
-          </button>
-        </div>
+        null
       )}
 
       {/* Filter sheet */}

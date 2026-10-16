@@ -46,18 +46,24 @@ function SettingRow({
   onClick?: () => void;
   danger?: boolean;
 }) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={!onClick && !right}
-      className={`w-full flex items-center gap-3 px-5 py-4 hover:bg-muted/50 transition-colors text-left ${danger ? 'text-destructive' : ''}`}
-    >
+  const inner = (
+    <>
       <div className={`flex-shrink-0 ${danger ? 'text-destructive' : 'text-muted-foreground'}`}>{icon}</div>
       <div className="flex-1 min-w-0">
         <p className={`text-sm font-medium ${danger ? 'text-destructive' : 'text-foreground'}`}>{label}</p>
         {sub && <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{sub}</p>}
       </div>
       {right ?? (onClick && <ChevronRight className="size-4 text-muted-foreground flex-shrink-0" />)}
+    </>
+  );
+  const cls = `w-full flex items-center gap-3 px-5 py-4 transition-colors text-left ${onClick ? 'cursor-pointer hover:bg-muted/50' : ''} ${danger ? 'text-destructive' : ''}`;
+  // Use div when a right element (e.g. Toggle button) is present to avoid button-in-button
+  if (right) {
+    return <div className={cls} onClick={onClick}>{inner}</div>;
+  }
+  return (
+    <button onClick={onClick} disabled={!onClick} className={cls}>
+      {inner}
     </button>
   );
 }
@@ -366,7 +372,7 @@ export function ProfileView({ darkMode, language, isPremium, onToggleDark, onLan
         </div>
         <div className="bg-card border-t border-b border-border">
           <SettingRow icon={<Edit className="size-4" />} label="Edit Profile" onClick={() => {}} />
-          <SettingRow icon={<MapPin className="size-4" />} label="Location & Office" sub="Ho Chi Minh City · Quang Trung" onClick={() => setSubView('locationSettings')} />
+          <SettingRow icon={<MapPin className="size-4" />} label="Location & Office" sub="Ho Chi Minh City · Ftown 3 & Ftown 2" onClick={() => setSubView('locationSettings')} />
           <SettingRow icon={<Briefcase className="size-4" />} label="Work Details" sub="Frontend Engineer · FPT Software" onClick={() => {}} />
         </div>
 

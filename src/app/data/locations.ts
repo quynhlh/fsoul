@@ -3,12 +3,12 @@ export type FPTCity = { id: string; name: string; country: string; offices?: FPT
 
 export const FPT_LOCATIONS: FPTCity[] = [
   // Vietnam
-  { id: 'hanoi', name: 'Hanoi', country: 'Vietnam', offices: [
+  { id: 'hanoi', name: 'Ha Noi', country: 'Vietnam', offices: [
     { id: 'caugiay', name: 'Cau Giay Office', area: 'Duy Tan St, Cau Giay District' },
     { id: 'hoalac', name: 'Hoa Lac Campus', area: 'Hoa Lac Hi-Tech Park, Thach That' },
   ]},
   { id: 'hcm', name: 'Ho Chi Minh City', country: 'Vietnam', offices: [
-    { id: 'quantrung', name: 'Quang Trung Software City', area: 'Go Vap District' },
+    { id: 'ftown', name: 'Ftown 3 & Ftown 2', area: 'District 9 (Thu Duc City)' },
     { id: 'tanthan', name: 'Tan Thuan Office', area: 'District 7' },
   ]},
   { id: 'danang', name: 'Da Nang', country: 'Vietnam' },
