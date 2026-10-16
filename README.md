@@ -1,5 +1,5 @@
 
-  # soul App
+  # fsoul App
 
   This is a code bundle for fsoul App. The original project is available at https://www.figma.com/design/Htx1GDSiY2SvZjkItElaLv/Tinder-Phone-App--Community-.
 
